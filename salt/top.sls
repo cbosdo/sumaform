@@ -41,3 +41,8 @@ base:
   'virtual_host:true':
     - match: grain
     - virthost
+
+  'git_host:true':
+    - match: grain
+    - githost
+
