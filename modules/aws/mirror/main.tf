@@ -81,6 +81,7 @@ authorized_keys: null
 additional_repos: {${join(", ", formatlist("'%s': '%s'", keys(var.additional_repos), values(var.additional_repos)))}}
 additional_packages: [${join(", ", formatlist("'%s'", var.additional_packages))}]
 reset_ids: true
+mirrored_ubuntus: [${join(", ", formatlist("'%s'", var.mirrored_ubuntus))}]
 
 EOF
 
