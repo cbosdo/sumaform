@@ -18,18 +18,15 @@ module "base" {
   // additional_network = false // needed for testing Retail
   name_prefix = "demo-" // if you use name_prefix, make sure to update the server_configuration for clients/minions below
   // timezone = "Europe/Berlin"
-  images = ["sles12sp3", "sles15sp1"]
+  images = ["sles12sp4", "sles15sp1", "ubuntu1804"]
 }
 
 module "srv" {
   source = "./modules/libvirt/suse_manager"
   base_configuration = "${module.base.configuration}"
-  product_version = "test"
-  // product_test_repository="https://download.opensuse.org/repositories/home:/cbosdonnat:/branches:/systemsmanagement:/Uyuni:/Master/openSUSE_Leap_42.3/"
-  product_test_repository="http://download.suse.de/ibs/home:/cbosdonnat:/branches:/Devel:/Galaxy:/Manager:/Head/SLE_15_SP1/"
+  product_version = "head"
   name = "srv"
   image = "sles15sp1"
-  // use_released_updates = true
   auto_accept = false
   disable_firewall = false
   skip_changelog_import = false
@@ -44,33 +41,58 @@ module "srv" {
   mac = "2A:C3:A7:A6:DE:BF"
 }
 
-module "virthost" {
+module "min-ubuntu" {
+  source = "./modules/libvirt/minion"
+  base_configuration = "${module.base.configuration}"
+  product_version = "head"
+  name = "min-ubuntu"
+  image = "ubuntu1804"
+  memory = 1024
+  server_configuration = "${module.srv.configuration}"
+  auto_connect_to_master = false
+  ssh_key_path = "./salt/controller/id_rsa.pub"
+  mac = "2A:C3:A7:A6:DE:BE"
+}
+
+module "min-kvm" {
   source = "./modules/libvirt/virthost"
   base_configuration = "${module.base.configuration}"
-  product_version = "test"
+  server_configuration = "${module.srv.configuration}"
+  product_version = "head"
   name = "min-kvm"
-  image = "sles12sp3"
-  server_configuration = { hostname = "demo-srv.tf.local" } // make sure to prepend the name_prefix, if used
+  image = "sles15sp1"
   auto_connect_to_master = true
   ssh_key_path = "./salt/controller/id_rsa.pub"
+  hvm_disk_image = "salt://virthost/sles12sp4.qcow2"
+  mac = "2A:C3:A7:A6:DE:BD"
 }
 
 module "git" {
   source = "./modules/libvirt/githost"
   base_configuration = "${module.base.configuration}"
-  product_version = "test"
+  product_version = "head"
   name = "git"
-  image = "sles12sp3"
-  server_configuration = { hostname = "demo-srv.tf.local" } // make sure to prepend the name_prefix, if used
+  image = "sles12sp4"
+  server_configuration = "${module.srv.configuration}"
   ssh_key_path = "./salt/controller/id_rsa.pub"
+  mac = "2A:C3:A7:A6:DE:BC"
 }
 
 module "builder" {
   source = "./modules/libvirt/host"
   base_configuration = "${module.base.configuration}"
   name = "builder"
-  image = "sles12sp3"
+  image = "sles12sp4"
   ssh_key_path = "./salt/controller/id_rsa.pub"
   memory = 1024
   additional_packages = ["btrfsprogs"]
+}
+
+module "grafana" {
+  source = "./modules/libvirt/grafana"
+  base_configuration = "${module.base.configuration}"
+  server_configuration = "${module.srv.configuration}"
+  product_version = "head"
+  monitor_systems = true
+  mac = "2A:C3:A7:A6:DE:BA"
 }
