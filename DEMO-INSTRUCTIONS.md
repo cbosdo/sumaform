@@ -12,6 +12,10 @@ This is mandatory for Kiwi and grafana to work properly.
       <forward mode='nat' />
       <bridge name='virbr0' stp='on' delay='0'/>
       <dns>
+        <host ip='192.168.122.94'>
+          <hostname>demo-srv.tf.local</hostname>
+          <hostname>alternate.name.com</hostname>
+        </host>
         <host ip='192.168.122.90'>
           <hostname>demo-builder.tf.local</hostname>
         </host>
@@ -22,6 +26,7 @@ This is mandatory for Kiwi and grafana to work properly.
       <ip address='192.168.122.1' netmask='255.255.255.0'>
         <dhcp>
           <range start='192.168.122.2' end='192.168.122.254'/>
+          <host mac='2a:c3:a7:a6:de:bf' name='demo-srv' ip='192.168.122.94'/>
           <host mac='2a:c3:a7:a6:de:bb' name='demo-builder' ip='192.168.122.90'/>
           <host mac='2a:c3:a7:a6:de:ba' name='demo-grafana' ip='192.168.122.89'/>
         </dhcp>
