@@ -40,6 +40,7 @@ Virtualization and image building
 * Create HEAD SLE 12 Manager tools channel
     * name: `head-manager-tools-sle12`
     * summary: `HEAD SLE 12 manager tools`
+    * parent: `SLES-12-SP4-Pool for x86_64`
     * repository url: http://mirror.tf.local/ibs/Devel:/Galaxy:/Manager:/Head:/SLE12-SUSE-Manager-Tools/images/repo/SLE-12-Manager-Tools-Beta-POOL-x86_64-Media1/
     * on demo-srv.tf.local, run `/usr/bin/spacewalk-repo-sync --channel head-manager-tools-sle12 --type yum`
 * Create SLES 12 SP4 activation key
@@ -70,6 +71,7 @@ Virtualization and image building
         * Activation key: 1-SLE-12-SP4
     * Build image on demo-builder.tf.local
 * Apply Virtualization entitlement to demo-min-kvm.tf.local
+* Create `vm01` on demo-min-kvm.tf.local as documented for vm02 further down.
 
 Prepare Ubuntu channels
 -----------------------
@@ -83,20 +85,20 @@ below.
         * Label: `${name}`
         * Parent Channel: ubuntu-18.04-pool for amd64
         * Architecture: AMD64 Debian
-        * Summary: `${summary}` 
+        * Summary: `${summary}`
     * Go to the Repositories > Add/Remove tab
         * Click the Create Repository button
-            * label: `${name}` 
-            * url: `${url}` 
+            * label: `${name}`
+            * url: `${url}`
             * type: deb
             * Click the Create button
         * Change to Sync tab and click Sync Now button
 
-| name                       | summary                            | url                                                                      |
-| -------------------------- | ---------------------------------- | ------------------------------------------------------------------------ |
-| ubuntu-18.04-main          | Ubuntu 18.04 main channel          | http://archive.ubuntu.com/ubuntu/dists/bionic/main/binary-amd64/         |
-| ubuntu-18.04-main-update   | Ubuntu 18.04 main updates channel  | http://archive.ubuntu.com/ubuntu/dists/bionic-updates/main/binary-amd64/ |
-| ubuntu-18.04-main-security | Ubuntu 18.04 main security channel | http://archive.ubuntu.com/ubuntu/dists/bionic/main/binary-amd64/         |
+| name                       | summary                            | url                                                                       |
+| -------------------------- | ---------------------------------- | ------------------------------------------------------------------------- |
+| ubuntu-18.04-main          | Ubuntu 18.04 main channel          | http://archive.ubuntu.com/ubuntu/dists/bionic/main/binary-amd64/          |
+| ubuntu-18.04-main-update   | Ubuntu 18.04 main updates channel  | http://archive.ubuntu.com/ubuntu/dists/bionic-updates/main/binary-amd64/  |
+| ubuntu-18.04-main-security | Ubuntu 18.04 main security channel | http://archive.ubuntu.com/ubuntu/dists/bionic-security/main/binary-amd64/ |
 
 If using a sumaformed mirror of the Ubuntu repositories, replace the `http://archive.ubuntu.com`
 parts of the URLs by `http://mirror.tf.local/archive.ubuntu.com`.
@@ -107,7 +109,9 @@ Now, create the Ubuntu activation key with the following input:
 * Base channel: ubuntu-18.04-pool for amd64
 * Include all children channels
 
-Create Ubuntu bootstrap repo
+* Create bootstrap script
+* Ensure all `apt-get` calls in the bootstrap scripts have `--yes` parameter (bsc#1137881)
+* Create Ubuntu bootstrap repo
 
 Prepare Content Staging
 -----------------------
@@ -115,6 +119,12 @@ Prepare Content Staging
 In Salt > Remote Commands, run the following on `demo-minion*` targets:
 
     wget http://demo-srv.tf.local/pub/sle12-gpg-pubkey-39db7c82.key && rpm --import sle12-gpg-pubkey-39db7c82.key
+
+Changes in `/etc/rhn/rhn.conf`:
+
+    java.salt_content_staging_advance = 1
+    java.salt_content_staging_window = 1
+    java.salt_batch_size = 2
 
 Demo Steps
 ==========
@@ -131,7 +141,7 @@ Image building
     * label: pos-graphical
     * type: Kiwi
     * URL: copy/pasted
-    * Activation key: SLES_12_SP3
+    * Activation key: SLES_12_SP4
 * Launch build of pos-graphical profile
 * Show image building status
 
@@ -157,7 +167,7 @@ Virtualization
         * VNC
     * Start vm01 and login in it
         * ip a
-        * hwinfo –disk
+        * hwinfo –-disk
 * Create Guest
     * name: vm2
     * Memory: 512MB
@@ -171,34 +181,31 @@ Ubuntu minions
 * SSH on demo-min-ubuntu.tf.local
 * wget http://demo-srv.tf.local/pub/bootstrap/bootstrap.sh
 * Edit it to set the activation key to 1-UBUNTU-KEY
-* `bash ./bootstrap.sh`
+* `bash ./bootstrap.sh` **Takes a few minutes & needs network**
 * Accept the Salt key
-* Show the registered system
+* Show the registered system (**packages list update takes time**)
 
 Monitoring
 ----------
 
 * Show the server dashboard
+* Show Admin > Manager Configuration > Monitoring
 * Check the `Monitoring` box in `demo-git.tf.local` properties and submit
-* Apply the hightstate on `demo-git.tf.local`
+* Apply the highstate on `demo-git.tf.local`
 * Show the client systems dashboard
 
 Content Staging (Batch Prefetching)
 -----------------------------------
 
-* Enable content staging GUI >Home>My Organization>Configuration
-    * /etc/rhn/rhn.conf:#java.salt_content_staging_advance = 1
-    * /etc/rhn/rhn.conf:#java.salt_content_staging_window = 1
-* spacewalk-service restart
-* In UI upgrade cron rpm for minion[1-6]
-
-    for i in {1..6}; do ssh minion$i "find /var/ -name "*.rpm" -exec ls -al '{}' \;"; done
+* Enable content staging GUI > Home > My Organization > Configuration
+* Show `java.salt_content_staging_advance` and `java.salt_content_staging_window` in `rhn.conf`
+* In UI upgrade cron rpm for `demo-minion-*` scheduled in H+1.
+* On demo-srv, run `salt '*minion*' cmd.run 'find /var/ -name "*.rpm" -exec ls -al '{}' \;'`
 
 Salt Batching
 -------------
 
-* Adjust `java.salt_batch_size` to `2` in `rhn.conf`
-* spacewalk-service restart
+* Show `java.salt_batch_size` adjusted to `2` in `rhn.conf`
 * Salt remote command in GUI
 
 Alternate Endpoint Download
@@ -212,14 +219,15 @@ Alternate Endpoint Download
 
 * Create `/srv/pillar/pkg_download_points.sls`
 
-    {% if grains['fqdn'] == 'demo-minion1.tf.local' %}
+    {% if grains['fqdn'] == 'demo-minion-1.tf.local' %}
           pkg_download_point_protocol: http
           pkg_download_point_host: alternate.name.com
           pkg_download_point_port: 444
     {% endif %}
 
-* `salt 'demo-minion1.tf.local' saltutil.refresh_pillar`
-* `salt 'demo-minion1.tf.local' state.apply channels`
+* `salt 'demo-minion-1.tf.local' saltutil.refresh_pillar`
+* `salt 'demo-minion-1.tf.local' state.apply channels`
+* Show `zypper lr -d` on demo-minion-1
 
 Opened tabs
 ===========
@@ -237,6 +245,24 @@ Clean up
 * Delete vm02
 * Shutdown vm01
 * Remove pos-graphical image build and profile
-* on demo-srv.tf.local, only leave the following image in /srv/www/os-images/1
-    * SLES12-SP2-JeOS-for-kvm-and-xen.x86_64-1.3.0-build67.qcow2 
+* on demo-srv.tf.local, only leave the following image in `/srv/www/os-images/1`
+    * SLES12-SP2-JeOS-for-kvm-and-xen.x86_64-\*.qcow2
 * Delete demo-min-ubuntu.tf.local system
+* Taint demo-min-ubuntu disk
+* Remove `/srv/pillar/*`
+* Delete demo-minion-\* systems
+* Taint minion's disks && terraform apply
+
+    for i in {1..6}; do
+        terraform state rm "module.minion.module.minion.libvirt_volume.main_disk[$i]";
+        virsh destroy demo-minion-$i
+        virsh undefine --remove-all-storage demo-minion-$i
+    done
+    terraform apply -auto-approve
+
+* In Salt > Remote Commands, run the following on `demo-minion*` targets:
+
+    wget http://demo-srv.tf.local/pub/sle12-gpg-pubkey-39db7c82.key && rpm --import sle12-gpg-pubkey-39db7c82.key
+
+* Remove demo-git.tf.local Monitoring entitlement + apply the highstate
+* Grafana: switch to server dashboard
