@@ -1,6 +1,33 @@
 Preparing
 =========
 
+Libvirt network configuration
+-----------------------------
+
+Set the following hostnames in libvirt's `default` network.
+This is mandatory for Kiwi and grafana to work properly.
+
+    <network>
+      <name>default</name>
+      <forward mode='nat' />
+      <bridge name='virbr0' stp='on' delay='0'/>
+      <dns>
+        <host ip='192.168.122.90'>
+          <hostname>demo-builder.tf.local</hostname>
+        </host>
+        <host ip='192.168.122.89'>
+          <hostname>demo-grafana.tf.local</hostname>
+        </host>
+      </dns>
+      <ip address='192.168.122.1' netmask='255.255.255.0'>
+        <dhcp>
+          <range start='192.168.122.2' end='192.168.122.254'/>
+          <host mac='2a:c3:a7:a6:de:bb' name='demo-builder' ip='192.168.122.90'/>
+          <host mac='2a:c3:a7:a6:de:ba' name='demo-grafana' ip='192.168.122.89'/>
+        </dhcp>
+      </ip>
+    </network>
+
 Virtualization and image building
 ---------------------------------
 
@@ -18,6 +45,12 @@ Virtualization and image building
     * demo-git.tf.local
     * demo-builder.tf.local
     * demo-min-kvm.tf.local
+    * demo-minion-1.tf.local
+    * demo-minion-2.tf.local
+    * demo-minion-3.tf.local
+    * demo-minion-4.tf.local
+    * demo-minion-5.tf.local
+    * demo-minion-6.tf.local
 * Apply builder entitlement
     * On demo-builder.tf.local Details > properties page
         * Check OS Image Build Host
@@ -70,6 +103,13 @@ Now, create the Ubuntu activation key with the following input:
 * Include all children channels
 
 Create Ubuntu bootstrap repo
+
+Prepare Content Staging
+-----------------------
+
+In Salt > Remote Commands, run the following on `demo-minion*` targets:
+
+    wget http://demo-srv.tf.local/pub/sle12-gpg-pubkey-39db7c82.key && rpm --import sle12-gpg-pubkey-39db7c82.key
 
 Demo Steps
 ==========
@@ -137,6 +177,44 @@ Monitoring
 * Check the `Monitoring` box in `demo-git.tf.local` properties and submit
 * Apply the hightstate on `demo-git.tf.local`
 * Show the client systems dashboard
+
+Content Staging (Batch Prefetching)
+-----------------------------------
+
+* Enable content staging GUI >Home>My Organization>Configuration
+    * /etc/rhn/rhn.conf:#java.salt_content_staging_advance = 1
+    * /etc/rhn/rhn.conf:#java.salt_content_staging_window = 1
+* spacewalk-service restart
+* In UI upgrade cron rpm for minion[1-6]
+
+    for i in {1..6}; do ssh minion$i "find /var/ -name "*.rpm" -exec ls -al '{}' \;"; done
+
+Salt Batching
+-------------
+
+* Adjust `java.salt_batch_size` to `2` in `rhn.conf`
+* spacewalk-service restart
+* Salt remote command in GUI
+
+Alternate Endpoint Download
+---------------------------
+
+* Create `/srv/pillar/top.sls`
+
+    base:
+      '*':
+        - pkg_download_points
+
+* Create `/srv/pillar/pkg_download_points.sls`
+
+    {% if grains['fqdn'] == 'demo-minion1.tf.local' %}
+          pkg_download_point_protocol: http
+          pkg_download_point_host: alternate.name.com
+          pkg_download_point_port: 444
+    {% endif %}
+
+* `salt 'demo-minion1.tf.local' saltutil.refresh_pillar`
+* `salt 'demo-minion1.tf.local' state.apply channels`
 
 Opened tabs
 ===========

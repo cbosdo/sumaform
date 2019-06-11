@@ -9,7 +9,7 @@ module "base" {
   cc_password = ...
 
   // mirror = "mirror.tf.local"
-  use_shared_resources = true
+  // use_shared_resources = true
 
   // optional parameters with defaults below
   // pool = "default"
@@ -63,7 +63,7 @@ module "min-kvm" {
   image = "sles15sp1"
   auto_connect_to_master = true
   ssh_key_path = "./salt/controller/id_rsa.pub"
-  hvm_disk_image = "salt://virthost/sles12sp4.qcow2"
+  // hvm_disk_image = "salt://virthost/sles12sp4.qcow2"
   mac = "2A:C3:A7:A6:DE:BD"
 }
 
@@ -95,4 +95,18 @@ module "grafana" {
   product_version = "head"
   monitor_systems = true
   mac = "2A:C3:A7:A6:DE:BA"
+}
+
+module "minion" {
+  source = "./modules/libvirt/minion"
+  base_configuration = "${module.base.configuration}"
+  server_configuration = "${module.srv.configuration}"
+  product_version = "head"
+  name = "minion"
+  image = "sles12sp4"
+  auto_connect_to_master = true
+  ssh_key_path = "./salt/controller/id_rsa.pub"
+  additional_packages = ["wget"]
+  count = 6
+  memory = 512
 }
