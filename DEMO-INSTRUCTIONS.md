@@ -170,7 +170,7 @@ Virtualization
         * hwinfo –-disk
 * Create Guest
     * name: vm2
-    * Memory: 512MB
+    * Memory: 800MB
     * Disk URL: copy from os-images tab
 * Talk about Salt virt
 * Wait for new VM to start and display console
