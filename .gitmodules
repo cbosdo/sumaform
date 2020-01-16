@@ -1,0 +1,3 @@
+[submodule "install_lab_env"]
+	path = install_lab_env
+	url = https://github.com/roncterry/install_lab_env
