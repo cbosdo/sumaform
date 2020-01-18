@@ -1,0 +1,16 @@
+<network>
+  <name>HOL1313-net</name>
+  <forward mode='nat'/>
+  <bridge name='virbr-HOL1313' stp='on' delay='0' macTableManager='libvirt'/>
+  <mac address='52:54:00:ee:05:d1'/>
+  <domain name='hol1313.net'/>
+  <ip address='192.168.15.1' netmask='255.255.255.0'>
+    <dhcp>
+      <host mac='52:54:00:A6:04:01' name="srv.hol1313.net" ip="192.168.15.11" />
+      <host mac='52:54:00:A6:04:02' name="kvm.hol1313.net" ip="192.168.15.12" />
+      <host mac='52:54:00:A6:04:03' name="grafana.hol1313.net" ip="192.168.15.13" />
+      <host mac='52:54:00:A6:04:04' name="prometheus.hol1313.net" ip="192.168.15.14" />
+    </dhcp>
+  </ip>
+</network>
+
