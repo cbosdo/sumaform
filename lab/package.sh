@@ -45,7 +45,7 @@ run rm -rf ${VM_DEST_DIR}/${COURSE_NUM} \
 run mkdir -p ${SCRIPTS_DEST_DIR}/${COURSE_NUM}/config
 run cp -r ../install_lab_env/config/include ${SCRIPTS_DEST_DIR}/${COURSE_NUM}/config
 for conf in $(ls config); do
-    run cp ${PWD}/config/${conf} ${SCRIPTS_DEST_DIR}/${COURSE_NUM}/config
+    run cp -r ${PWD}/config/${conf} ${SCRIPTS_DEST_DIR}/${COURSE_NUM}/config
 done
 run cp ../install_lab_env/*.sh ${SCRIPTS_DEST_DIR}/${COURSE_NUM}
 
