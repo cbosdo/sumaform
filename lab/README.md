@@ -5,8 +5,8 @@ The workflow is the following:
 
 * Run `git submodule update` to pull the installer
 * Copy `main.tf.hol1313` as `main.tf` in the parent folder
-* Run the `prepare-vms` script.
-  So far this file only contains manual steps to run and will hopefully be automated later. 
+* Run the `prepare-vms` script. Ensure the terminal has a light background to read all the output.
+  So far this file only contains manual steps to run and will hopefully be automated later.
 * Do any manual change that is needed on the virtual machines
 * Run the `package.sh` script to create the installer package
 
