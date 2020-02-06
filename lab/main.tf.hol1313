@@ -3,7 +3,7 @@ provider "libvirt" {
 }
 
 module "base" {
-  source = "./modules/libvirt/base"
+  source = "./modules/base"
 
   cc_username = "..."
   cc_password = "..."
@@ -11,11 +11,13 @@ module "base" {
   use_avahi = false
   domain = "hol1313.net"
   images = ["sles15sp1"]
-  network_name = "HOL1313-net"
+  provider_settings = {
+    network_name = "HOL1313-net"
+  }
 }
 
 module "srv" {
-  source = "./modules/libvirt/suse_manager"
+  source = "./modules/server"
   base_configuration = "${module.base.configuration}"
   product_version = "4.0-released"
   name = "srv"
@@ -23,53 +25,72 @@ module "srv" {
   auto_accept = false
   skip_changelog_import = false
   browser_side_less = false
-  mgr_sync_autologin = false
+  mgr_sync_autologin = true
   create_sample_channel = false
   create_sample_activation_key = false
   create_sample_bootstrap_script = false
   publish_private_ssl_key = false
+  channels = [
+              "sle-product-sles15-sp1-pool-x86_64",
+              "sle-module-basesystem15-sp1-pool-x86_64",
+              "sle-module-server-applications15-sp1-pool-x86_64",
+              "sle-manager-tools15-debuginfo-pool-x86_64-sp1"
+             ]
+  wait_for_reposync = true
   java_debugging = true
   ssh_key_path = "./salt/controller/id_rsa.pub"
-  mac = "52:54:00:A6:04:01"
+  provider_settings = {
+    memory = 8192
+    mac = "52:54:00:A6:04:01"
+  }
 }
 
 module "virthost" {
-  source = "./modules/libvirt/virthost"
+  source = "./modules/virthost"
   base_configuration = "${module.base.configuration}"
   server_configuration = "${module.srv.configuration}"
   auto_connect_to_master = true
   product_version = "4.0-released"
+  activation_key = "1-SLE-15-SP1"
   name = "kvm"
   image = "sles15sp1"
   ssh_key_path = "./salt/controller/id_rsa.pub"
   hvm_disk_image = "salt://virthost/sles15sp1.qcow2"
-  mac = "52:54:00:A6:04:02"
+  provider_settings = {
+    mac = "52:54:00:A6:04:02"
+  }
 }
 
 module "grafana" {
-  source = "./modules/libvirt/minion"
+  source = "./modules/minion"
   base_configuration = "${module.base.configuration}"
   server_configuration = "${module.srv.configuration}"
   product_version = "4.0-released"
+  activation_key = "1-SLE-15-SP1"
   auto_connect_to_master = false
   name = "grafana"
   image = "sles15sp1"
   ssh_key_path = "./salt/controller/id_rsa.pub"
-  memory = 2048
-  vcpu = 2
-  mac = "52:54:00:A6:04:03"
+  provider_settings = {
+    memory = 2048
+    vcpu = 2
+    mac = "52:54:00:A6:04:03"
+  }
 }
 
 module "prometheus" {
-  source = "./modules/libvirt/minion"
+  source = "./modules/minion"
   base_configuration = "${module.base.configuration}"
   server_configuration = "${module.srv.configuration}"
   product_version = "4.0-released"
+  activation_key = "1-SLE-15-SP1"
   auto_connect_to_master = false
   name = "prometheus"
   image = "sles15sp1"
   ssh_key_path = "./salt/controller/id_rsa.pub"
-  memory = 2048
-  vcpu = 2
-  mac = "52:54:00:A6:04:04"
+  provider_settings = {
+    memory = 2048
+    vcpu = 2
+    mac = "52:54:00:A6:04:04"
+  }
 }

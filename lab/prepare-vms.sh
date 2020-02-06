@@ -15,7 +15,18 @@ export LIBVIRT_DEFAULT_URI=qemu:///system
 
 # TODO If cleanup requested, run terraform destroy --auto-approve
 
-# TODO Run terraform apply --auto-approve
+# Run terraform apply --auto-approve
+run terraform apply --auto-approve
 
-# TODO Script SUMA config as much a possible
+# Script SUMA config as much a possible
+SSH="ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null root@192.168.15.11"
+run $SSH spacecmd -u admin -p admin -- activationkey_create -n SLE-15-SP1 -b sle-product-sles15-sp1-pool-x86_64 -d "SLE 15 SP1"
+run $SSH spacecmd -u admin -p admin -- activationkey_addchildchannels 1-SLE-15-SP1 \
+    sle-module-basesystem15-sp1-pool-x86_64 \
+    sle-module-basesystem15-sp1-updates-x86_64 \
+    sle-module-server-applications15-sp1-pool-x86_64 \
+    sle-module-server-applications15-sp1-updates-x86_64 \
+    sle-manager-tools15-pool-x86_64-sp1 \
+    sle-manager-tools15-updates-x86_64-sp1 \
+    sle-product-sles15-sp1-updates-x86_64
 
