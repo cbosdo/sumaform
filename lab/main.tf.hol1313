@@ -8,6 +8,8 @@ module "base" {
   cc_username = "..."
   cc_password = "..."
 
+  use_avahi = false
+  domain = "hol1313.net"
   images = ["sles15sp1"]
   network_name = "HOL1313-net"
 }
@@ -36,7 +38,7 @@ module "virthost" {
   base_configuration = "${module.base.configuration}"
   server_configuration = "${module.srv.configuration}"
   auto_connect_to_master = true
-  product_version = "head"
+  product_version = "4.0-released"
   name = "kvm"
   image = "sles15sp1"
   ssh_key_path = "./salt/controller/id_rsa.pub"
