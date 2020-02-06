@@ -17,23 +17,21 @@ header-includes: |
 
 ...
 
-Introduction slides:
+# Setup hypervisor
 
-* How Virt SUMA works
-* Monitoring
-* Agenda
-* Virt Slides
+* Accept Salt keys of KVM minion
+* Add Virtualization entitlement in the properties
+* See that the registration key dialog has Virtualization entitlement box
 
-* Setup hypervisor
-  * Setup libvirt
-  * Install exporter for hypervisor
-* Create VM from UI
-* Create VM from Salt State
+## Setup libvirt
 
-Monitoring Slides
+* Add Virtualization host formula
+* Edit the formula value
+* Apply the highstate
 
-* Create Prometheus and Grafana using formula
-* Create activation key
-* Onboard VM with activation key -> automatically monitored
-* Prepare dashboard
+## Install exporter for hypervisor
+
+# Create VM from UI
+
+# Create VM from Salt State
 
