@@ -34,13 +34,14 @@ done
 # Prepare all course folders we need
 echo -e "${LTBLUE}Preparing the folders ...${NC}"
 echo -e "${LTBLUE}---------------------------------------------------------${NC}"
-run mkdir -p ${VM_DEST_DIR} ${ISO_DEST_DIR} ${PDF_DEST_DIR} ${SCRIPTS_DEST_DIR} ${COURSE_FILES_DEST_DIR}
+run mkdir -p ${VM_DEST_DIR} ${ISO_DEST_DIR} ${PDF_DEST_DIR} ${SCRIPTS_DEST_DIR} ${COURSE_FILES_DEST_DIR} \
+    ${IMAGE_DEST_DIR}/${COURSE_NUM}
 
 run rm -rf ${VM_DEST_DIR}/${COURSE_NUM} \
     ${ISO_DEST_DIR}/${COURSE_NUM} \
     ${PDF_DEST_DIR}/${COURSE_NUM} \
     ${SCRIPTS_DEST_DIR}/${COURSE_NUM} \
-    ${COURSE_FILES_DEST_DIR}/${COURSE_NUM}
+    ${COURSE_FILES_DEST_DIR}/${COURSE_NUM} \
 
 run mkdir -p ${SCRIPTS_DEST_DIR}/${COURSE_NUM}/config
 run cp -r ../install_lab_env/config/include ${SCRIPTS_DEST_DIR}/${COURSE_NUM}/config
@@ -48,6 +49,14 @@ for conf in $(ls config); do
     run cp -r ${PWD}/config/${conf} ${SCRIPTS_DEST_DIR}/${COURSE_NUM}/config
 done
 run cp ../install_lab_env/*.sh ${SCRIPTS_DEST_DIR}/${COURSE_NUM}
+
+# Get the JeOS image to image dir
+echo -e "${LTBLUE}Ensuring we have the JeOS image...${NC}"
+echo -e "${LTBLUE}---------------------------------------------------------${NC}"
+JEOS_IMAGE=${IMAGE_DEST_DIR}/${COURSE_NUM}/SLES15-SP1-JeOS.x86_64-15.1-kvm-and-xen.qcow2
+if test ! -e ${JEOS_IMAGE}; then
+    run curl -o ${JEOS_IMAGE} http://dist.suse.de/install/SLE-15-SP1-JeOS-QU2/SLES15-SP1-JeOS.x86_64-15.1-kvm-and-xen-QU2.qcow2
+fi
 
 # Copy VM images to lab/VMs
 echo -e "${LTBLUE}Copying VMs...${NC}"
