@@ -7,13 +7,23 @@
 
 export LIBVIRT_DEFAULT_URI=qemu:///system
 
-# TODO Check for main.tf
+# Check for main.tf
+if test ! -e 'main.tf'; then
+    echo "Copy and adapt lab/main.tf.hol1313 as main.tf"
+    exit 1
+fi
 
-# TODO Redefine HOL1313-net
+# Cleanup if requested
+if test "$1" == "--clean"; then
+    terraform destroy --auto-approve
+    run virsh net-undefine HOL1313-net
+fi
 
-# TODO Download sles15sp1.qcow2 in salt/virthost
-
-# TODO If cleanup requested, run terraform destroy --auto-approve
+# Define HOL1313-net if needed
+virsh net-info HOL1313-net >/dev/null 2>&1
+if "x$?" == "x1"; then
+    run virsh net-define lab/config/libvirt.cfg/HOL1313-net.xml
+fi
 
 # Run terraform apply --auto-approve
 run terraform apply --auto-approve
@@ -30,3 +40,4 @@ run $SSH spacecmd -u admin -p admin -- activationkey_addchildchannels 1-SLE-15-S
     sle-manager-tools15-updates-x86_64-sp1 \
     sle-product-sles15-sp1-updates-x86_64
 
+exit 0
