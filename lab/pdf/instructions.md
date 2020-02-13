@@ -23,8 +23,7 @@ The lab is composed of the following machines:
 
 * `srv.hol1313.net` with IP `192.168.15.11` is the SUSE Manager server
 * `kvm.hol1313.net` with IP `192.168.15.12` is the KVM virtual host
-* `grafana.hol1313.net` with IP `192.168.15.13` is the Grafana server
-* `prometheus.hol1313.net` with IP `192.168.15.14` is the Prometheus server
+* `monitoring.hol1313.net` with IP `192.168.15.13` is the Monitoring server
 
 The machines can be accessed using their IPs from the laptop, and using their hostnames from another of the lab machine.
 

@@ -8,8 +8,7 @@
     <dhcp>
       <host mac='52:54:00:A6:04:01' name="srv.hol1313.net" ip="192.168.15.11" />
       <host mac='52:54:00:A6:04:02' name="kvm.hol1313.net" ip="192.168.15.12" />
-      <host mac='52:54:00:A6:04:03' name="grafana.hol1313.net" ip="192.168.15.13" />
-      <host mac='52:54:00:A6:04:04' name="prometheus.hol1313.net" ip="192.168.15.14" />
+      <host mac='52:54:00:A6:04:03' name="monitoring.hol1313.net" ip="192.168.15.13" />
     </dhcp>
   </ip>
 </network>

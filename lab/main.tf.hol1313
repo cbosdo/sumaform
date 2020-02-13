@@ -61,14 +61,14 @@ module "kvm" {
   }
 }
 
-module "grafana" {
+module "monitoring" {
   source = "./modules/minion"
   base_configuration = "${module.base.configuration}"
   server_configuration = "${module.srv.configuration}"
   product_version = "4.0-released"
   activation_key = "1-SLE-15-SP1"
   auto_connect_to_master = true
-  name = "grafana"
+  name = "monitoring"
   image = "sles15sp1"
   ssh_key_path = "./salt/controller/id_rsa.pub"
   provider_settings = {
@@ -78,19 +78,3 @@ module "grafana" {
   }
 }
 
-module "prometheus" {
-  source = "./modules/minion"
-  base_configuration = "${module.base.configuration}"
-  server_configuration = "${module.srv.configuration}"
-  product_version = "4.0-released"
-  activation_key = "1-SLE-15-SP1"
-  auto_connect_to_master = true
-  name = "prometheus"
-  image = "sles15sp1"
-  ssh_key_path = "./salt/controller/id_rsa.pub"
-  provider_settings = {
-    memory = 2048
-    vcpu = 2
-    mac = "52:54:00:A6:04:04"
-  }
-}

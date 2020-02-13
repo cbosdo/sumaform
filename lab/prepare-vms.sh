@@ -1,9 +1,9 @@
 #!/usr/bin/bash
 
-. config/lab_env.cfg
-. ../install_lab_env/config/include/colors.sh
-. ../install_lab_env/config/include/global_vars.sh
-. ../install_lab_env/config/include/common_functions.sh
+. lab/config/lab_env.cfg
+. install_lab_env/config/include/colors.sh
+. install_lab_env/config/include/global_vars.sh
+. install_lab_env/config/include/common_functions.sh
 
 export LIBVIRT_DEFAULT_URI=qemu:///system
 
@@ -13,20 +13,23 @@ if test ! -e 'main.tf'; then
     exit 1
 fi
 
+# Run terraform init
+run terraform init || exit 1
+
 # Cleanup if requested
 if test "$1" == "--clean"; then
     terraform destroy --auto-approve
+    run virsh net-destroy HOL1313-net
     run virsh net-undefine HOL1313-net
 fi
 
 # Define HOL1313-net if needed
-virsh net-info HOL1313-net >/dev/null 2>&1
-if "x$?" == "x1"; then
-    run virsh net-define lab/config/libvirt.cfg/HOL1313-net.xml
-fi
+virsh net-info HOL1313-net >/dev/null 2>&1 ||
+run virsh net-define lab/config/libvirt.cfg/HOL1313-net.xml &&
+run virsh net-start HOL1313-net || exit 1
 
 # Run terraform apply --auto-approve
-run terraform apply --auto-approve
+run terraform apply --auto-approve || exit 1
 
 # Script SUMA config as much a possible
 SSH="ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null root@192.168.15.11"

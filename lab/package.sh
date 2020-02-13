@@ -10,7 +10,7 @@ export LIBVIRT_DEFAULT_URI=qemu:///system
 # Shutdown all VMs
 echo -e "${LTBLUE}Shutting down VMs...${NC}"
 echo -e "${LTBLUE}---------------------------------------------------------${NC}"
-VMs="srv kvm grafana prometheus"
+VMs="srv kvm monitoring"
 DO_SHUTDOWN=
 for VM in $VMs; do
     if test "$(virsh list | grep ' $VM ' | wc -l)" != "0"; then
@@ -63,7 +63,7 @@ echo -e "${LTBLUE}Copying VMs...${NC}"
 echo -e "${LTBLUE}---------------------------------------------------------${NC}"
 VMS_DIR=${VM_DEST_DIR}/${COURSE_NUM}
 
-for VM in srv kvm grafana prometheus; do
+for VM in srv kvm monitoring; do
     VM_NAME=${COURSE_NUM}-${VM}
     run mkdir -p ${VMS_DIR}/${VM_NAME}/
     virsh dumpxml $VM > ${VMS_DIR}/${VM_NAME}/${VM_NAME}.xml
