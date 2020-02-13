@@ -25,7 +25,10 @@ fi
 
 # Define HOL1313-net if needed
 virsh net-info HOL1313-net >/dev/null 2>&1 ||
-run virsh net-define lab/config/libvirt.cfg/HOL1313-net.xml &&
+run virsh net-define lab/config/libvirt.cfg/HOL1313-net.xml
+
+# Start HOL1313-net if needed
+virsh net-info HOL1313-net | grep 'Active:[[:blank:]]*yes' >/dev/null 2>&1 ||
 run virsh net-start HOL1313-net || exit 1
 
 # Run terraform apply --auto-approve
