@@ -10,7 +10,7 @@ export LIBVIRT_DEFAULT_URI=qemu:///system
 # Shutdown all VMs
 echo -e "${LTBLUE}Shutting down VMs...${NC}"
 echo -e "${LTBLUE}---------------------------------------------------------${NC}"
-VMs="srv kvm monitoring"
+VMs="srv kvm1 kvm2 monitoring"
 DO_SHUTDOWN=
 for VM in $VMs; do
     if test "$(virsh list | grep ' $VM ' | wc -l)" != "0"; then

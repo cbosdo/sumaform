@@ -7,8 +7,9 @@
   <ip address='192.168.15.1' netmask='255.255.255.0'>
     <dhcp>
       <host mac='52:54:00:A6:04:01' name="srv.hol1313.net" ip="192.168.15.11" />
-      <host mac='52:54:00:A6:04:02' name="kvm.hol1313.net" ip="192.168.15.12" />
-      <host mac='52:54:00:A6:04:03' name="monitoring.hol1313.net" ip="192.168.15.13" />
+      <host mac='52:54:00:A6:04:02' name="kvm1.hol1313.net" ip="192.168.15.12" />
+      <host mac='52:54:00:A6:04:03' name="kvm2.hol1313.net" ip="192.168.15.13" />
+      <host mac='52:54:00:A6:04:04' name="monitoring.hol1313.net" ip="192.168.15.14" />
     </dhcp>
   </ip>
 </network>

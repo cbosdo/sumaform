@@ -22,8 +22,9 @@ header-includes: |
 The lab is composed of the following machines:
 
 * `srv.hol1313.net` with IP `192.168.15.11` is the SUSE Manager server
-* `kvm.hol1313.net` with IP `192.168.15.12` is the KVM virtual host
-* `monitoring.hol1313.net` with IP `192.168.15.13` is the Monitoring server
+* `kvm1.hol1313.net` with IP `192.168.15.12` is the KVM virtual host
+* `kvm2.hol1313.net` with IP `192.168.15.13` is the KVM virtual host
+* `monitoring.hol1313.net` with IP `192.168.15.14` is the Monitoring server
 
 The machines can be accessed using their IPs from the laptop, and using their hostnames from another of the lab machine.
 
@@ -32,16 +33,16 @@ The machines can be accessed using their IPs from the laptop, and using their ho
 ## Accept Salt keys of KVM minion
 
 Go to the **Salt** menu to list the systems that have not been accepted yet.
-Click the **Accept** button for the *kvm.hol1313.net* machine.
+Click the **Accept** button for the *kvm1.hol1313.net* and *kvm2.hol1313.net* machines.
 
 ## Add Virtualization entitlement in the properties
 
-Navigate to the *kvm.hol1313.net* system **Properties** tab.
+Navigate to the *kvm1.hol1313.net* system **Properties** tab.
 Check the **Virtualization Host** add-on system type and validate by clicking the **Update Properties** button.
 
 The system will now have the **Virtualization** tab.
 However, due to a Salt limitation, the **salt-minion** daemon needs to be restarted to see live changes in the virtual machines list.
-In order to do this `ssh` on `kvm.hol1313.net` and run `systemctl restart salt-minion`.
+In order to do this `ssh` on `kvm1.hol1313.net` and run `systemctl restart salt-minion`.
 
 **Important note**: for the need of the lab, the virtual host is also virtual machine.
 However SUSE Manager does not handle nested virtualization.
@@ -67,7 +68,7 @@ This exercise will leverage a Salt formula to ease the KVM and libvirt installat
 A formula in SUSE Manager is an easy way to modify the Salt high state of the system.
 First the formula needs to be enabled on the system.
 
-Navigate to the *kvm.hol1313.net* system's **Formulas** tab.
+Navigate to the *kvm1.hol1313.net* system's **Formulas** tab.
 Select the **Virtualization Host** formula and click the **Save** button
 
 ### Edit the formula value
@@ -75,7 +76,7 @@ Select the **Virtualization Host** formula and click the **Save** button
 Adding the formula does not alter the system, it simply modifies the Salt high state.
 The formula offers to modify some values to adapt the configuration.
 
-In the **Formulas** tab of the *kvm.hol1313.net* system click on the **Virtualization Host** subtab.
+In the **Formulas** tab of the *kvm1.hol1313.net* system click on the **Virtualization Host** subtab.
 The default values are perfectly acceptable for the exercise.
 Take a look at these values to figure out what can be changed.
 Click the **Save Formula** button after making changes.
@@ -84,7 +85,7 @@ Click the **Save Formula** button after making changes.
 
 The high state is the aggregation of all the Salt states that will be applied on the system.
 
-Navigate to the **States** tab of the *kvm.hol1313.net* system.
+Navigate to the **States** tab of the *kvm1.hol1313.net* system.
 The computed highstate is displayed and can be reviewed.
 
 The highstate can first be applied in test mode to ensure there is no problem.
@@ -95,6 +96,8 @@ Then apply the highstate in normal mode to actually install and configure both t
 Again follow the link in the message at the top of the page to check the action status.
 
 Note that when selecting a Xen hypervisor in the formula, a reboot of the virtualization host is needed after applying the highstate.
+
+** Prepare *kvm2.hol1313.net* using the same method.**
 
 ## Install exporter for hypervisor
 
@@ -139,7 +142,7 @@ vm02-running:
     - disks:
       - name: system
         format: qcow2
-        image: https://srv.hol1313.net/pub/images/SLES15-SP1-JeOS.x86_64-15.1-kvm-and-xen-QU2.qcow2 
+        image: https://srv.hol1313.net/pub/images/SLES15-SP1-JeOS.x86_64-15.1-kvm-and-xen-QU2.qcow2
         pool: default
         size: 122880
     - interfaces:
@@ -151,9 +154,9 @@ vm02-running:
     - seed: False
 ```
 
-Apply the state using the `salt 'kvm*' state.apply vms` command on `srv.hol1313.net`.
+Apply the state using the `salt 'kvm1*' state.apply vms` command on `srv.hol1313.net`.
 
-Check that the `vm02` virtual machine is actually running on the KVM virtual host by either using the `virsh` command on `kvm.hol1313.net` or by running `salt 'kvm*' virt.list_active_vms` on `srv.hol1313.net`.
+Check that the `vm02` virtual machine is actually running on the *kvm1* virtual host by either using the `virsh` command on `kvm1.hol1313.net` or by running `salt 'kvm*' virt.list_active_vms` on `srv.hol1313.net`.
 
 TODO Here too we need to go through the JeOS first boot wizard. We may want to disable it using virt-customize.
 

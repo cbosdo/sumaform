@@ -45,19 +45,35 @@ module "srv" {
   }
 }
 
-module "kvm" {
+module "kvm1" {
   source = "./modules/virthost"
   base_configuration = "${module.base.configuration}"
   server_configuration = "${module.srv.configuration}"
   auto_connect_to_master = true
   product_version = "4.0-released"
   activation_key = "1-SLE-15-SP1"
-  name = "kvm"
+  name = "kvm1"
   image = "sles15sp1"
   ssh_key_path = "./salt/controller/id_rsa.pub"
   hvm_disk_image = ""
   provider_settings = {
     mac = "52:54:00:A6:04:02"
+  }
+}
+
+module "kvm2" {
+  source = "./modules/virthost"
+  base_configuration = "${module.base.configuration}"
+  server_configuration = "${module.srv.configuration}"
+  auto_connect_to_master = true
+  product_version = "4.0-released"
+  activation_key = "1-SLE-15-SP1"
+  name = "kvm2"
+  image = "sles15sp1"
+  ssh_key_path = "./salt/controller/id_rsa.pub"
+  hvm_disk_image = ""
+  provider_settings = {
+    mac = "52:54:00:A6:04:03"
   }
 }
 
@@ -74,7 +90,7 @@ module "monitoring" {
   provider_settings = {
     memory = 2048
     vcpu = 2
-    mac = "52:54:00:A6:04:03"
+    mac = "52:54:00:A6:04:04"
   }
 }
 
