@@ -174,3 +174,63 @@ TODO Add variables, pillar and templating to the previous state
 ### Virtual storage pools and networks using Salt
 
 TODO Explain the existing Salt states and how to workaround the limitations
+
+# Monitoring
+
+On this exercise, you will use SUSE Manager to configure a Monitoring server with Prometheus and Grafana, configure SUSE Manager's self health, and add exporters to client systems.
+
+Prometheus and Grafana packages are included in the SUSE Manager Client Tools for SLE12, SLE15 and openSUSE 15.x.
+
+## Preparing the Monitoring Server 
+
+**Installing Prometheus**
+
+- In the SUSE Manager UI, open the details page of the system called 'monitoring', where Prometheus is to be installed, and navigate to the **Formulas** tab.
+- Check the **Prometheus** checkbox and click **Save**
+- Navigate to the **Prometheus** tab in the top menu.
+- In the **SUSE Manager/Uyuni Server** section, enter valid API credentials (default: admin/admin). 
+- Click on the **Save Formula** button.
+- Apply the highstate and wait for it to complete.
+- Once the highstate completes, check that the Prometheus interface loads correctly. In your browser, navigate to the URL of the server where Prometheus is installed, on port 9090 `http://monitoring.hol1313.local:9090`.
+
+**Installing Grafana**
+
+- In the SUSE Manager UI, open the details page of the system called 'monitoring', where Grafana is to be installed, and navigate to the **Formulas** tab.
+- Check the **Grafana** checkbox and click **Save**
+- Navigate to the **Grafana** tab in the top menu.
+- In the **Enable and configure Grafana** section, enter the admin credentials you want to use to log in Grafana.
+- On the **Datasources** section, make sure that the Prometheus URL field points to the system where Prometheus is running.
+- Click on the **Save Formula** button.
+- Apply the highstate and wait for it to complete.
+- Once the highstate completes, check that the Grafana interface loads correctly. In your browser, navigate to the URL of the server where Grafana is installed, on port 3000 `http://monitoring.hol1313.local:3000`.
+
+## Configuring SUSE Manager Self-health 
+
+- In the SUSE Manager UI, navigate to menu:Admin[Manager Configuration > Monitoring].
+- Click the **Enable services** button.
+- Restart Tomcat and Taskomatic.
+  * In order to do this `ssh` on `srv.hol1313.local` and run `spacewalk-service restart`.
+- Navigate to the URL of your Prometheus server, on port 9090 `http://monitoring.hol1313.local:9090`
+- In the Prometheus UI, navigate to menu:[Status > Targets] and confirm that all the endpoints on the **mgr-server** group are up.
+- Navigate to the URL of your Grafana server, on port 3000 `http://monitoring.hol1313.local:3000`
+- Check that the SUSE Manager Self-health dashboard on Grafana has live data.
+
+## Monitoring Managed Systems 
+
+Prometheus metrics exporters can be installed and configured on Salt clients using formulas. 
+
+- Exporters are libraries that help with exporting metrics from third-party systems as Prometheus metrics. 
+- Exporters are useful whenever it is not feasible to instrument a given application or system with Prometheus metrics directly. 
+- Multiple exporters can run on a monitored host to export local metrics.
+
+Once you have the exporters installed and configured, you can start using Prometheus to collect metrics from monitored systems. 
+
+**Installing and configuring Node Exporter on client systems**
+
+- In the SUSE Manager UI, open the details page of the client system to be monitored, and navigate to the menu:Formulas tab.
+- Check the **Enabled** checkbox on the **Prometheus Exporters** formula and click **Save**.
+- Navigate to the menu:Formulas[Prometheus Exporters] tab.
+- Select the Node Exporter from the list
+- Click on the **Save Formula** button.
+- Apply the highstate and wait for it to complete.
+- Confirm that the newly monitored system shows up on Prometheus UI and Grafana.
