@@ -50,6 +50,10 @@ for conf in $(ls config); do
 done
 run cp ../install_lab_env/*.sh ${SCRIPTS_DEST_DIR}/${COURSE_NUM}
 
+# Link the course_files
+run mkdir -p ${COURSE_FILES_DEST_DIR}
+run ln -s ${PWD}/course_files ${COURSE_FILES_DEST_DIR}/${COURSE_NUM}
+
 # Get the JeOS image to image dir
 echo -e "${LTBLUE}Ensuring we have the JeOS image...${NC}"
 echo -e "${LTBLUE}---------------------------------------------------------${NC}"

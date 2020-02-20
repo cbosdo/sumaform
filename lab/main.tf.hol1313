@@ -19,7 +19,7 @@ module "base" {
 module "srv" {
   source = "./modules/server"
   base_configuration = "${module.base.configuration}"
-  product_version = "4.0-released"
+  product_version = "4.0-nightly"
   name = "srv"
   image = "sles15sp1"
   auto_accept = false
@@ -73,6 +73,7 @@ module "kvm2" {
   ssh_key_path = "./salt/controller/id_rsa.pub"
   hvm_disk_image = ""
   provider_settings = {
+    memory = 3096
     mac = "52:54:00:A6:04:03"
   }
 }
