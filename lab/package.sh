@@ -10,12 +10,11 @@ export LIBVIRT_DEFAULT_URI=qemu:///system
 # Shutdown all VMs
 echo -e "${LTBLUE}Shutting down VMs...${NC}"
 echo -e "${LTBLUE}---------------------------------------------------------${NC}"
-VMs="srv kvm1 kvm2 monitoring"
 DO_SHUTDOWN=
-for VM in $VMs; do
-    if test "$(virsh list | grep ' $VM ' | wc -l)" != "0"; then
+for VM in ${LIBVIRT_VM_LIST}; do
+    if test $(virsh list | grep " ${VM##${COURSE_NUM}-} " | wc -l) -ne 0; then
         DO_SHUTDOWN="yes"
-        run virsh shutdown $VM
+        run virsh shutdown ${VM##${COURSE_NUM}-}
     fi
 done
 
@@ -24,10 +23,10 @@ if test "$DO_SHUTDOWN" = "yes"; then
 fi
 
 # We were already patient enough!
-for VM in $VMs; do
-    if test "$(virsh list | grep ' $VM ' | wc -l)" != "0"; then
-        echo -e "${ORANGE}Forcing ${VM} down since it didn't shutdown after 30s${NC}"
-        run virsh destroy $VM
+for VM in ${LIBVIRT_VM_LIST}; do
+    if test $(virsh list | grep " ${VM##${COURSE_NUM}-} " | wc -l) -ne 0; then
+        echo -e "${ORANGE}Forcing ${VM##${COURSE_NUM}-} down since it didn't shutdown after 30s${NC}"
+        run virsh destroy ${VM##${COURSE_NUM}-}
     fi
 done
 
@@ -67,8 +66,8 @@ echo -e "${LTBLUE}Copying VMs...${NC}"
 echo -e "${LTBLUE}---------------------------------------------------------${NC}"
 VMS_DIR=${VM_DEST_DIR}/${COURSE_NUM}
 
-for VM in srv kvm monitoring; do
-    VM_NAME=${COURSE_NUM}-${VM}
+for VM_NAME in ${LIBVIRT_VM_LIST}; do
+    VM=${VM_NAME##${COURSE_NUM}-}
     run mkdir -p ${VMS_DIR}/${VM_NAME}/
     virsh dumpxml $VM > ${VMS_DIR}/${VM_NAME}/${VM_NAME}.xml
     cat << EOF > vm-cleanup-script.sed
