@@ -17,3 +17,6 @@ It takes time and CPU to do it!
 
 * Pandoc with LaTeX converter to generate the PDF documentation from Markdown
 * All sumaform dependencies, including libvirt and QEMU/KVM
+* texlive-pagecolor
+* texlive-ly1
+* texlive-footnotebackref

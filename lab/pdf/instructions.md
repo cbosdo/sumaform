@@ -3,17 +3,14 @@ title: 'Tame your virtual machines using SUSE Manager'
 author:
     - Cédric Bosdonnat
     - João Cavalheiro
-geometry: margin=1in
-header-includes: |
-    \usepackage{graphicx}
-    \usepackage{titling}
-    \usepackage{fancyhdr}
-    \pagestyle{fancyplain}
-    \fancyhead{}
-    \rhead{\fancyplain{}{\thetitle}}
-    \lfoot{\raisebox{-0.5\height}{\includegraphics[width=1in]{pdf/suse-logo.png}}}
-    \cfoot{\thepage}
-    \rfoot{\raisebox{-0.5\height}{\includegraphics[width=1in]{pdf/susecon20-logo.png}}}
+titlepage: true
+titlepage-text-color: FFFFFF
+titlepage-background: pdf/title.jpg
+titlepage-rule-height: 0
+logo: pdf/logo-white.png
+footer-left: \raisebox{-0.5\height}{\includegraphics[width=1in]{pdf/suse-logo.png}}
+footer-center: \thepage
+footer-right: \raisebox{-0.5\height}{\includegraphics[width=1in]{pdf/susecon20-logo.png}}
 
 ...
 
@@ -331,7 +328,9 @@ A working solution can be found in the `SPOILERS` folder, the `vms-templated.sls
 
 ```sh
 salt 'kvm1*' state.apply vms \
-     pillar="{'vms': [{'name': 'vm02', 'activation_key': '1-SLE-15-SP1', 'cpu': 2, 'mem': 700}]}"
+     pillar="{'vms': [{'name': 'vm02', \
+                       'activation_key': '1-SLE-15-SP1', \
+                       'cpu': 2, 'mem': 700}]}"
 ```
 
 Note that the pillar parameter contains the string representation of a Python dicitionary.
