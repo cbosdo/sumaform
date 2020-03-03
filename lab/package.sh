@@ -104,6 +104,6 @@ run cp ../salt/controller/id_rsa* ${SCRIPTS_DEST_DIR}/${COURSE_NUM}/config/ssh/
 echo -e "${LTBLUE}Generating documentation...${NC}"
 echo -e "${LTBLUE}---------------------------------------------------------${NC}"
 run mkdir -p ${PDF_DEST_DIR}/${COURSE_NUM}
-run pandoc pdf/instructions.md -s --highlight-style zenburn -o ${PDF_DEST_DIR}/${COURSE_NUM}/instructions.pdf
+run pandoc pdf/instructions.md -s --highlight-style pdf/pygments.theme -o ${PDF_DEST_DIR}/${COURSE_NUM}/instructions.pdf
 
 run sh ../install_lab_env/backup_lab_env.sh
