@@ -4,10 +4,10 @@ author:
     - Cédric Bosdonnat
     - João Cavalheiro
 titlepage: true
-titlepage-text-color: FFFFFF
-titlepage-background: pdf/title.jpg
+titlepage-text-color: 0D2C40
+titlepage-background: pdf/title.png
 titlepage-rule-height: 0
-logo: pdf/logo-white.png
+logo: pdf/suse-logo.png
 footer-left: \raisebox{-0.5\height}{\includegraphics[width=1in]{pdf/suse-logo.png}}
 footer-center: \thepage
 footer-right: \raisebox{-0.5\height}{\includegraphics[width=1in]{pdf/susecon20-logo.png}}
@@ -32,13 +32,14 @@ The `admin` user has `admin` for password.
 
 # Virtualization hosts setup
 
+## Activating virtualization features in SUSE Manager
+
 Before being able to create and manage virtual machines, a virtualization host needs to be set up with an hypervisor.
 The exercise aims at setting up both `kvm1.hol1313.net` and `kvm2.hol1313.net`.
 In order to show two different ways of proceeding, first `kvm1.hol1313.net` will be setup, then the other one.
 
----
 
-**Exercise 1.1**: Register `kvm1.hol1313.net` as virtualization host
+### Exercise 1.1: register `kvm1.hol1313.net` as virtualization host
 
 **Step 1:** accept Salt keys of `kvm1.hol1313` minion
 
@@ -58,9 +59,8 @@ The system will now have the **Virtualization** tab.
 However, due to a Salt limitation, the **salt-minion** daemon needs to be restarted to see live changes in the virtual machines list.
 In order to do this `ssh` on `kvm1.hol1313.net` and run `systemctl restart salt-minion`.
 
----
 
-**Exercise 1.2**: Register `kvm2.hol1313.net` as virtualization host
+### Exercise 1.2: register `kvm2.hol1313.net` as virtualization host
 
 Adding the **Virtualization Host** Add-on type can also be performed at the registration key level.
 In this exercise, first add the add-on type on the registration key, and then perform all the other tasks from the previous excercise.
@@ -78,23 +78,22 @@ By adding an Addon system type to the activation key, this type will be added to
 We don't want the *monitoring.hol1313.net* system to also have the **Virtualization host** property but there is no need to remove it from the activation key.
 The **Virtualization host** add-on type can only be added to physical machines.
 
-> **Important note**
->
-> For the need of the lab, the virtualization hosts are also virtual machines.
-> However SUSE Manager does not handle nested virtualization.
-> Some dirty hacks have thus been performed to lure SUSE Manager into thinking the KVM virtual hosts are physical machines.
-> **Never do this in production!**
+**Important note**
+
+For the need of the lab, the virtualization hosts are also virtual machines.
+However SUSE Manager does not handle nested virtualization.
+Some dirty hacks have thus been performed to lure SUSE Manager into thinking the KVM virtual hosts are physical machines.
+
+**Never do this in production!**
 
 ## Configuring the virtualization host
 
 The systems now have the **Virtualization Host** Add-on type, but this did not install the hypervisor and the needed tools.
 This should be done in a separate step, either before or after adding the Add-on system type.
-There are multiple ways to setup a virtualization host. As a reference, consult the SUSE [Virtualization Guide](https://documentation.suse.com/sles/15-SP1/html/SLES-all/book-virt.html) and the [Virtualization Best Practices](https://documentation.suse.com/sles/15-SP1/html/SLES-all/article-vt-best-practices.html).
+There are multiple ways to setup a virtualization host. As a reference, consult the SUSE [Virtualization Guide](https://documentation.suse.com/sles/15-SP1/html/SLES-all/book-virt.html) [^1] and the [Virtualization Best Practices](https://documentation.suse.com/sles/15-SP1/html/SLES-all/article-vt-best-practices.html)[^2].
 
 
----
-
-**Exercise 1.3:** Install `kvm1.hol1313.net` and `kvm2.hol1313.net` hypervisor and tools
+### Exercise 1.3: install `kvm1.hol1313.net` and `kvm2.hol1313.net` hypervisor and tools
 
 This exercise will leverage a Salt formula to ease the KVM and libvirt installation.
 The steps will go through the systems one by one, but there is a way to do it on the two of them in one shot.
@@ -165,9 +164,7 @@ Copy the JeOS image provided in `/home/images/HOL1313/` in the newly created fol
 
 ## Discovering the web interface
 
----
-
-**Exercise 1.4:** using the web interface
+### Exercise 1.4: using the web interface
 
 All the virtual machines management takes place in the **Virtualization** tab of the virtualization host system.
 
@@ -223,15 +220,14 @@ As a result, the systems list should now include a `vm01.hol1313.net` entry.
 While managing virtual machines from the web user interface is convenient, automating this is even better.
 The following exercises will progressively show how to write Salt states to define virtual machines.
 
----
 
-**Exercise 1.5:** simple Salt state
+### Exercise 1.5: simple Salt state
 
 **Step 1:** copy the state file
 
 A Salt state file is a YAML file with an `.sls` extension and they are usually living in the `/srv/salt/` folder on the SUSE Manager server.
 
-1. copy the `${HOME}/course_files/HOL-1313/simple-vms.sls` file as `/srv/salt/vms.sls` on `srv.hol1313.net`.
+1. copy the `${HOME}/course_files/HOL-1313/simple-vms.sls` file as `vms.sls` in `srv.hol1313.net` `/srv/salt` folder.
 2. read the file to understand what this is supposed to do.
 Note that the Salt documentation is available in the `salt-doc` package.
 
@@ -240,11 +236,14 @@ Note that the Salt documentation is available in the `salt-doc` package.
 Writing the Salt state does not create the virtual machine: the state needs to be applied on the virtual host for this.
 
 1. run the `salt 'kvm1*' state.apply vms` command on `srv.hol1313.net`.
-2. check that the `vm02` virtual machine is actually running on the *kvm1* virtual host by either using the `virsh` command on `kvm1.hol1313.net` or by running `salt 'kvm*' virt.list_active_vms` on `srv.hol1313.net`.
+2. check that the `vm02` virtual machine is actually running on the *kvm1* virtual host by either using the `virsh` command on `kvm1.hol1313.net` or by running the following command on `srv.hol1313.net`:
 
----
+```sh
+salt 'kvm*' virt.list_active_vms
+```
 
-**Exercise 1.6:** customize the template disk image
+
+### Exercise 1.6: customize the template disk image
 
 Here too the JeOS first boot wizard needs to be completed.
 The goal of this exercise is to enhance the previously created state to use the `virt-customize` tool to disable it.
@@ -261,7 +260,7 @@ salt 'kvm1*' state.apply virt.deleted pillar='{"domain_name": "vm02"}'
 
 **Step 2:** modify the `vms.sls` state file
 
-Check the `virt-customize` help or [man page](http://libguestfs.org/virt-customize.1.html) and the [requisites Salt documentation](https://docs.saltstack.com/en/latest/ref/states/requisites.html#requisites) to change the Salt state to:
+Check the `virt-customize` help or [man page](http://libguestfs.org/virt-customize.1.html)[^3] and the [requisites Salt documentation](https://docs.saltstack.com/en/latest/ref/states/requisites.html#requisites)[^4] to change the Salt state to:
 
 1. copy the template image locally
 2. remove the `jeos-firstboot` package from the image
@@ -281,9 +280,8 @@ The correction of those problems is currently pending upstream review.
 
 Apply the `vms.sls` state again and verify that the newly created `vm02` works as expected.
 
----
 
-**Exercise 1.7:** make the state reusable 
+### Exercise 1.7: make the state reusable 
 
 The `vms.sls` state can only be used for a `vm02` virtual machine so far.
 State files can be made reusable by introducing templating and pillar data.
@@ -291,7 +289,7 @@ State files can be made reusable by introducing templating and pillar data.
 The goal here is to change the `vms.sls` state to handle multiple virtual machines with different parameters.
 Let's assume each VM could have different CPU and memory allocation, use different virtual network or storage pools and have different activation keys.
 
-The [pillar](https://docs.saltstack.com/en/latest/topics/tutorials/pillar.html) data could look like the following:
+The [pillar](https://docs.saltstack.com/en/latest/topics/tutorials/pillar.html)[^5] data could look like the following:
 
 ```yaml
 vms:
@@ -303,7 +301,7 @@ vms:
     activation_key: 1-SLE-15-SP1
 ```
 
-Salt states allow [Jinja2 templating](https://docs.saltstack.com/en/latest/topics/jinja/index.html) with some Salt-specific helpers.
+Salt states allow [Jinja2 templating](https://docs.saltstack.com/en/latest/topics/jinja/index.html)[^6] with some Salt-specific helpers.
 The pillar data can be accessed using the `pillar` dictionary as a variable.
 For instance `{{ pillar['vms'] }}` or `{{ pillar.get('vms', []) }}` would hold the array of virtual machines of the previously defined pillar.
 Thus looping over the virtual machines pillar data would look like the following:
@@ -335,13 +333,17 @@ salt 'kvm1*' state.apply vms \
 
 Note that the pillar parameter contains the string representation of a Python dicitionary.
 
-**Step 4:** check that the created VM has the expected CPU and memory using `salt 'kvm1*' virt.get_xml vm02`.
+**Step 4:** check that the created VM has the expected CPU and memory by running the following command.
+
+```sh
+salt 'kvm1*' virt.get_xml vm02
+```
+
 
 **Step 5 (*optional*):** use encrypted pillar data to store the root password.
 
----
 
-**Exercise 1.8:** create VMs as part of the highstate
+### Exercise 1.8: create VMs as part of the highstate
 
 In the previous exercise the virtual machine state needed to be applied manually.
 The virtual machines creation can be included in the virtual host configuration using the highstate.
@@ -394,9 +396,8 @@ salt 'kvm2*' state.show_highstate
 salt 'kvm2*' state.apply
 ```
 
----
 
-**Exercise 1.9:** virtual storage pools and networks using Salt
+### Exercise 1.9: virtual storage pools and networks using Salt
 
 Virtual machines are using storage pools to store their disks.
 They are also using virtual networks.
@@ -429,9 +430,9 @@ Even if the `virt.pool_running` handles all types of `libvirt` virtual storage p
 This file defines a libvirt private network.
 Take a moment to read this state; the important parts to notice are the dependencies definitions using both `require` and `watch`.
 The `onlyif` parameter of the `cmd.run` state is also worth noting.
-For more details on this parameter, check the Salt [`cmd.run` state documentation](https://docs.saltstack.com/en/latest/ref/states/all/salt.states.cmd.html#salt.states.cmd.run).
+For more details on this parameter, check the Salt [`cmd.run` state documentation](https://docs.saltstack.com/en/latest/ref/states/all/salt.states.cmd.html#salt.states.cmd.run)[^7].
 
-[`libvirt` documentation](https://libvirt.org/formatnetwork.html) is also worth reading to understand the various options of a network configuration.
+[`libvirt` documentation](https://libvirt.org/formatnetwork.html)[^8] is also worth reading to understand the various options of a network configuration.
 
 The next steps will use the newly added test storage pool and private network states to the `kvm2.hol1313.net` highstate.
 
@@ -506,3 +507,12 @@ Once you have the exporters installed and configured, you can start using Promet
 - Click on the **Save Formula** button.
 - Apply the highstate and wait for it to complete.
 - Confirm that the newly monitored system shows up on Prometheus UI and Grafana.
+
+[^1]: https://documentation.suse.com/sles/15-SP1/html/SLES-all/book-virt.html
+[^2]: https://documentation.suse.com/sles/15-SP1/html/SLES-all/article-vt-best-practices.html
+[^3]: http://libguestfs.org/virt-customize.1.html
+[^4]: https://docs.saltstack.com/en/latest/ref/states/requisites.html#requisites
+[^5]: https://docs.saltstack.com/en/latest/topics/tutorials/pillar.html
+[^6]: https://docs.saltstack.com/en/latest/topics/jinja/index.html
+[^7]: https://docs.saltstack.com/en/latest/ref/states/all/salt.states.cmd.html#salt.states.cmd.run
+[^8]: https://libvirt.org/formatnetwork.html
