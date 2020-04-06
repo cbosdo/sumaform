@@ -1,3 +1,7 @@
+include:
+  - test_pool
+  - private_network
+
 {% for vm in pillar.get('vms', []) %} 
 {{ vm['name'] }}_image_cached:
   file.managed:

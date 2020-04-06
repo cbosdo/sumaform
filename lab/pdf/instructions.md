@@ -227,7 +227,7 @@ The following exercises will progressively show how to write Salt states to defi
 
 A Salt state file is a YAML file with an `.sls` extension and they are usually living in the `/srv/salt/` folder on the SUSE Manager server.
 
-1. copy the `${HOME}/course_files/HOL-1313/simple-vms.sls` file as `vms.sls` in `srv.hol1313.net` `/srv/salt` folder.
+1. copy the `${HOME}/course_files/HOL-1313/vms.sls` file in `srv.hol1313.net` `/srv/salt` folder.
 2. read the file to understand what this is supposed to do.
 Note that the Salt documentation is available in the `salt-doc` package.
 
@@ -438,15 +438,24 @@ The next steps will use the newly added test storage pool and private network st
 
 **Step 3:** change the pillar to use the `test` pool instead of the `default` one for the `db` and `web` virtual machines.
 
+Also modify the dependencies of the `vms.sls` state to ensure the pool is running before the VM.
+
 **Step 4:** add interfaces using the `private` network
 
 Using the `private` network requires a little more work since the existing `vms` state also needs to be extended to handle multiple network interfaces.
 
 Modify the `db` and `web` virtual machines to have two interfaces: one using the `default` network, and one using the `private` one.
 
+As for the pool, the `vms` state will also need to be enhanced with dependencies on the `<netname>_virt_net_start` states to ensure the networks
+are started before the VM.
+
 Again a solution can be found in the `SPOILERS` folder with the `*-final.sls` files.
 
-**Step 5 (*optional*)**: add highstates for the `db` and `vms` virtual machines to install `postgresql` and `apache2` packages on them.
+**Step 6**: [Include](https://docs.saltstack.com/en/getstarted/config/include.html)[^9] the `private_network` and `test_pool` states in the `vms.sls` one.
+
+**Step 7**: Delete the previously created `db` and `web` virtual machines, apply the high state and verify the result.
+
+**Step 8 (*optional*)**: add highstates for the `db` and `vms` virtual machines to install `postgresql` and `apache2` packages on them.
 
 # Monitoring
 
@@ -598,3 +607,4 @@ Click the link in the message at the top of the page to follow the status of the
 [^6]: https://docs.saltstack.com/en/latest/topics/jinja/index.html
 [^7]: https://docs.saltstack.com/en/latest/ref/states/all/salt.states.cmd.html#salt.states.cmd.run
 [^8]: https://libvirt.org/formatnetwork.html
+[^9]: https://docs.saltstack.com/en/getstarted/config/include.html
