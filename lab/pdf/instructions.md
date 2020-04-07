@@ -75,6 +75,8 @@ By adding an Addon system type to the activation key, this type will be added to
 
 **Step 3:** check `kvm2.hol1313.net` properties
 
+**Step 4:** restart the `salt-minion` service on `kvm2.hol1313.net`
+
 We don't want the *monitoring.hol1313.net* system to also have the **Virtualization host** property but there is no need to remove it from the activation key.
 The **Virtualization host** add-on type can only be added to physical machines.
 
@@ -118,8 +120,7 @@ The formula offers to modify some values to adapt the configuration.
 In this step, review the **Virtualization host** formula values.
 
 In the **Formulas** tab of the *kvm1.hol1313.net* system click on the **Virtualization Host** subtab.
-The default values are perfectly acceptable for the exercise.
-Take a look at these values to figure out what can be changed.
+The default values are usually acceptable, but for the exercise a bridged network using `br0` is required.
 Click the **Save Formula** button after making changes.
 
 Do the same for `kvm2.hol1313.net`.
@@ -471,10 +472,10 @@ In this exercise we will use SUSE Manager formulas to install Prometheus on the 
 
 **Step 1:** enable and configure the Prometheus formula
 
-1. Navigate to the *monitoring.hol1313.net* system **Formulas** tab.
+1. Navigate to the **Formulas** tab of the *monitoring.hol1313.net* system.
 2. Check the **Prometheus** checkbox and click **Save**.
 3. Navigate to the **Prometheus** tab in the top menu.
-4. In the **SUSE Manager/Uyuni Server** section, enter the API credentials: 
+4. In the **Uyuni Server** section, enter the API credentials: 
 
 * *Username*: admin
 * *Password*: admin
@@ -483,19 +484,11 @@ Make sure that the **Monitor this server** and **Autodiscover clients** options 
 
 5. Click on the **Save Formula** button.
 
-**Step 2:** apply the highstate 
+6. Apply the highstate and wait for it to be completed.
 
-1. Navigate to the **States** tab of the *monitoring.hol1313.net* system.
-The computed highstate is displayed and can be reviewed.
+**Step 2:** test the setup
 
-2. Click on **Apply highstate**.
-
-3. Wait for the highstate to complete.
-Click the link in the message at the top of the page to follow the status of the state apply action.
-
-**Step 3:** test the setup
-
-In your browser, navigate to `http://monitoring.hol1313.local:9090`.
+In your browser, navigate to `http://monitoring.hol1313.net:9090`.
 Check that the Prometheus UI is loading and that there are no errors.
 
 ### Exercise 2.2: install Grafana in `monitoring.hol1313.net`
@@ -504,33 +497,21 @@ In this exercise we will use SUSE Manager formulas to install Grafana on the mon
 
 **Step 1:** enable and configure the Grafana formula
 
-1. Navigate to the *monitoring.hol1313.net* system **Formulas** tab.
-2. Check the **Grafana** checkbox and click **Save**.
-3. Navigate to the **Grafana** tab in the top menu.
-4. In the **Enable and configure Grafana** section, set the following properties:
+1. Add the **Grafana** formula to the *monitoring.hol1313.net* system with the following properties:
 
-* *Default admin user*: grafana
-* *Default admin password*: grafana
-* *Prometheus URL*: http://monitoring.hol1313.local:9080
+* **Default admin user**: grafana
+* **Default admin password**: grafana
+* **Prometheus URL**: http://monitoring.hol1313.net:9090
 
 There credentials above will be used to log in the Grafana UI.
 Make sure that all the checkboxes on the *Dashboards* section are enabled.
 
 5. Click on the **Save Formula** button.
+6. Apply the highstate and wait for it to be completed.
 
-**Step 2:** apply the highstate 
+**Step 2:** test the setup
 
-1. Navigate to the **States** tab of the *monitoring.hol1313.net* system.
-The computed highstate is displayed and can be reviewed.
-
-2. Click on **Apply highstate**.
-
-3. Wait for the highstate to complete.
-Click the link in the message at the top of the page to follow the status of the state apply action.
-
-**Step 3:** test the setup
-
-In your browser, navigate to `http://monitoring.hol1313.local:3000`.
+In your browser, navigate to `http://monitoring.hol1313.net:3000`.
 Check that the Grafana UI is loading and that there are no errors.
 
 On the Grafana UI, you should see a list of available dashboards, still without any metrics.
@@ -541,26 +522,27 @@ On the Grafana UI, you should see a list of available dashboards, still without 
 In this exercise we will configure SUSE Manager Server to start exposing its metrics.
 Once it is complete, you should be able to see the Server metrics showing up in Prometheus and Grafana.
 
-Since the monitoring formulas do all the configuration for you, Prometheus and Grafana should be automatically connected and ready to display SUSE Manager server metrics as soon as you enable this option.
+Since the monitoring formulas do all the configuration, Prometheus and Grafana should be automatically connected and ready to display SUSE Manager server metrics as soon as this option is enabled.
 
 **Step 1:** enable server self-health
 
 1. In the SUSE Manager side menu, navigate to: Admin -> Manager Configuration -> Monitoring.
 2. Click on the **Enable** button and wait for the setup to complete.
+3. SUSE Manager needs to be restarted to fully apply the changes.
 
 
 **Step 2:** test self-health in Prometheus
 
-1. In your browser, navigate to `http://monitoring.hol1313.local:9090` to open the Prometheus UI.
-2. Navigate to **Targets** in the top menu
+1. Navigate to `http://monitoring.hol1313.net:9090` to open the Prometheus UI.
+2. Navigate to **Status / Targets** in the top menu
 
-A list of SUSE Manager endpoints should now appear, all with status 'Up'.
+A list of SUSE Manager endpoints should now appear, all with status **'Up'**.
 
 
 **Step 3:** test self-health in Grafana
 
-1. In your browser, navigate to `http://monitoring.hol1313.local:3000` to open the Grafana UI.
-2. Select the **SUSE Manager Server** dashboard from the dashboard list 
+1. Navigate to `http://monitoring.hol1313.net:3000` to open the Grafana UI.
+2. Select the **Uyuni Server** dashboard from the dashboard list 
 
 Check that the dashboard is correctly displaying metrics about the server.
 
@@ -575,28 +557,22 @@ Prometheus metrics exporters can be installed and configured on Salt clients usi
 
 Once you have the exporters installed and configured, you can start using Prometheus to collect metrics from monitored systems. 
 
-**Step 1:** configuring Node Exporter on a client system
+**Step 0**: add the virtual machines as systems
 
-1. open the details page of one of the VMs created on previous exercises and navigate to the **Formulas** tab.
-2. Check the **Enabled** checkbox on the **Prometheus Exporters** formula and click **Save**.
-3. Navigate to the **Prometheus Exporters** tab in the top menu.
-4. Select the Node Exporter from the list and click on the **Save Formula** button.
+Before the next steps, accept the Salt keys of the previously created virtual machines.
 
-**Step 2:** apply the highstate 
+**Step 1:** configuring Node Exporter on the virtual machines
 
-1. Navigate to the **States** tab of the *monitoring.hol1313.net* system.
-The computed highstate is displayed and can be reviewed.
-
-2. Click on **Apply highstate**.
-
-3. Wait for the highstate to complete.
-Click the link in the message at the top of the page to follow the status of the state apply action.
+1. Create a system group containing all the virtual machines.
+2. Add the **Prometheus Exporters** formula to the newly created system group.
+4. Ensure the **Node Exporter** is enabled in the formula.
+5. Apply the highstate to the system group and wait for them to complete.
 
 **Step 3:** test the configuration
 
-1. In your browser, navigate to `http://monitoring.hol1313.local:3000` to open the Grafana UI.
-2. Select the **SUSE Manager Client** dashboard from the dashboard list.
-3. Confirm that the newly monitored system shows up on list and has metrics data.
+1. Navigate to `http://monitoring.hol1313.net:3000` to open the Grafana UI.
+2. Select the **Uyuni Client** dashboard from the dashboard list.
+3. Confirm that the newly monitored systems show up on list and has metrics data.
 
 
 [^1]: https://documentation.suse.com/sles/15-SP1/html/SLES-all/book-virt.html
