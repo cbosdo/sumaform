@@ -450,11 +450,11 @@ Modify the `db` and `web` virtual machines to have two interfaces: one using the
 As for the pool, the `vms` state will also need to be enhanced with dependencies on the `<netname>_virt_net_start` states to ensure the networks
 are started before the VM.
 
+**Step 6**: [include](https://docs.saltstack.com/en/getstarted/config/include.html)[^9] the `private_network` and `test_pool` states in the `vms.sls` one.
+
 Again a solution can be found in the `SPOILERS` folder with the `*-final.sls` files.
 
-**Step 6**: [Include](https://docs.saltstack.com/en/getstarted/config/include.html)[^9] the `private_network` and `test_pool` states in the `vms.sls` one.
-
-**Step 7**: Delete the previously created `db` and `web` virtual machines, apply the high state and verify the result.
+**Step 7**: delete the previously created `db` and `web` virtual machines, apply the high state and verify the result.
 
 **Step 8 (*optional*)**: add highstates for the `db` and `vms` virtual machines to install `postgresql` and `apache2` packages on them.
 
@@ -470,7 +470,9 @@ Prometheus and Grafana packages are included in the SUSE Manager Client Tools fo
 
 In this exercise we will use SUSE Manager formulas to install Prometheus on the monitoring host
 
-**Step 1:** enable and configure the Prometheus formula
+**Step 1**: accept the Salt key for `monitoring.hol1313.net`
+
+**Step 2**: enable and configure the Prometheus formula
 
 1. Navigate to the **Formulas** tab of the *monitoring.hol1313.net* system.
 2. Check the **Prometheus** checkbox and click **Save**.
@@ -486,7 +488,7 @@ Make sure that the **Monitor this server** and **Autodiscover clients** options 
 
 6. Apply the highstate and wait for it to be completed.
 
-**Step 2:** test the setup
+**Step 3**: test the setup
 
 In your browser, navigate to `http://monitoring.hol1313.net:9090`.
 Check that the Prometheus UI is loading and that there are no errors.
@@ -557,22 +559,43 @@ Prometheus metrics exporters can be installed and configured on Salt clients usi
 
 Once you have the exporters installed and configured, you can start using Prometheus to collect metrics from monitored systems. 
 
-**Step 0**: add the virtual machines as systems
+**Step 1**: add the virtual machines as systems
 
 Before the next steps, accept the Salt keys of the previously created virtual machines.
 
-**Step 1:** configuring Node Exporter on the virtual machines
+**Step 3**: open ports in the VMs firewall
+
+The Prometheus exporters are publishing the data using a web server, usually on port `9100`.
+Since the virtual machines are running SLES 15 SP1 with firewalld enabled, this port needs to be opened on all virtual machines.
+
+There are several ways to achieve this, but this step will show how to use configuration channels for this.
+In the **Configuration / Channels** menu, create a state channel with the following content using the
+[firewalld Salt state](https://docs.saltstack.com/en/latest/ref/states/all/salt.states.firewalld.html)[^10]:
+
+```yaml
+public:
+  firewalld.present:
+    - name: public
+    - ports:
+      - 9100/tcp
+```
+
+**Step 2**: configuring Node Exporter on the virtual machines
+
+The next instrusction will add the prometheus exporters and the firewalld config to all virtual machines at once.
+This can obviously be done also on a per machine basis.
 
 1. Create a system group containing all the virtual machines.
 2. Add the **Prometheus Exporters** formula to the newly created system group.
-4. Ensure the **Node Exporter** is enabled in the formula.
+3. Ensure the **Node Exporter** is enabled in the formula.
+4. Add the state channel create in the previous step to the group.
 5. Apply the highstate to the system group and wait for them to complete.
 
-**Step 3:** test the configuration
+**Step 3**: test the configuration
 
 1. Navigate to `http://monitoring.hol1313.net:3000` to open the Grafana UI.
 2. Select the **Uyuni Client** dashboard from the dashboard list.
-3. Confirm that the newly monitored systems show up on list and has metrics data.
+3. Confirm that the newly monitored systems show up on list and have metrics data.
 
 
 [^1]: https://documentation.suse.com/sles/15-SP1/html/SLES-all/book-virt.html
@@ -584,3 +607,4 @@ Before the next steps, accept the Salt keys of the previously created virtual ma
 [^7]: https://docs.saltstack.com/en/latest/ref/states/all/salt.states.cmd.html#salt.states.cmd.run
 [^8]: https://libvirt.org/formatnetwork.html
 [^9]: https://docs.saltstack.com/en/getstarted/config/include.html
+[^10]: https://docs.saltstack.com/en/latest/ref/states/all/salt.states.firewalld.html

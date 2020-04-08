@@ -11,12 +11,12 @@
         virt-customize --root-password password:linux \
                        --run-command "rpm -e jeos-firstboot" \
                        --hostname {{ vm['name'] }}.hol1313.net \
-        {% if vm.get('activation_key', None) %} \
+        {%- if vm.get('activation_key', None) %}
                        --append-line '/etc/salt/grains:susemanager:' \
                        --append-line '/etc/salt/grains:  activation_key: {{ vm['activation_key'] }}' \
                        --append-line '/etc/salt/minion.d/master.conf:master: srv.hol1313.net' \
                        --run-command 'systemctl enable salt-minion' \
-        {% endif %} \
+        {%- endif %}
                        -a /tmp/{{ vm['name'] }}-SLES15-SP1-kvm-and-xen.qcow2
     - require:
       - file: {{ vm['name'] }}_image_cached
