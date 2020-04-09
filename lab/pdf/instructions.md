@@ -563,7 +563,7 @@ Once you have the exporters installed and configured, you can start using Promet
 
 Before the next steps, accept the Salt keys of the previously created virtual machines.
 
-**Step 3**: open ports in the VMs firewall
+**Step 2**: open ports in the VMs firewall
 
 The Prometheus exporters are publishing the data using a web server, usually on port `9100`.
 Since the virtual machines are running SLES 15 SP1 with firewalld enabled, this port needs to be opened on all virtual machines.
@@ -580,7 +580,7 @@ public:
       - 9100/tcp
 ```
 
-**Step 2**: configuring Node Exporter on the virtual machines
+**Step 3**: configuring Node Exporter on the virtual machines
 
 The next instrusction will add the prometheus exporters and the firewalld config to all virtual machines at once.
 This can obviously be done also on a per machine basis.
@@ -591,7 +591,7 @@ This can obviously be done also on a per machine basis.
 4. Add the state channel create in the previous step to the group.
 5. Apply the highstate to the system group and wait for them to complete.
 
-**Step 3**: test the configuration
+**Step 4**: test the configuration
 
 1. Navigate to `http://monitoring.hol1313.net:3000` to open the Grafana UI.
 2. Select the **Uyuni Client** dashboard from the dashboard list.
