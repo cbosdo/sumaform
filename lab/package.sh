@@ -1,4 +1,13 @@
 #!/usr/bin/bash
+if test "$1" == "--no-vm"; then
+    # Change the config file to strip the VMs
+    sed 's/^MIN_DISK_FREE=.*$/MIN_DISK_FREE=1/' -i config/lab_env.cfg
+    sed 's/^MIN_MEMORY=.*$/MIN_MEMORY=1/' -i config/lab_env.cfg
+    sed 's/^MIN_CPUS=.*$/MIN_CPUS=1/' -i config/lab_env.cfg
+    sed 's/^LIBVIRT_VM_LIST=.*$/LIBVIRT_VM_LIST=""/' -i config/lab_env.cfg
+    sed 's/^LIBVIRT_VNET_LIST=.*$/LIBVIRT_VNET_LIST=""/' -i config/lab_env.cfg
+    sed '/^CUSTOM_INSTALL_COMMANDS_FILE=/d' -i config/lab_env.cfg
+fi
 
 . config/lab_env.cfg
 . ../install_lab_env/config/include/colors.sh
@@ -40,7 +49,12 @@ run rm -rf ${VM_DEST_DIR}/${COURSE_NUM} \
     ${ISO_DEST_DIR}/${COURSE_NUM} \
     ${PDF_DEST_DIR}/${COURSE_NUM} \
     ${SCRIPTS_DEST_DIR}/${COURSE_NUM} \
-    ${COURSE_FILES_DEST_DIR}/${COURSE_NUM} \
+    ${COURSE_FILES_DEST_DIR}/${COURSE_NUM}
+
+run mkdir ${VM_DEST_DIR}/${COURSE_NUM} \
+    ${ISO_DEST_DIR}/${COURSE_NUM} \
+    ${PDF_DEST_DIR}/${COURSE_NUM} \
+    ${SCRIPTS_DEST_DIR}/${COURSE_NUM}
 
 run mkdir -p ${SCRIPTS_DEST_DIR}/${COURSE_NUM}/config
 run cp -r ../install_lab_env/config/include ${SCRIPTS_DEST_DIR}/${COURSE_NUM}/config
@@ -104,6 +118,6 @@ run cp ../salt/controller/id_rsa* ${SCRIPTS_DEST_DIR}/${COURSE_NUM}/config/ssh/
 echo -e "${LTBLUE}Generating documentation...${NC}"
 echo -e "${LTBLUE}---------------------------------------------------------${NC}"
 run mkdir -p ${PDF_DEST_DIR}/${COURSE_NUM}
-run pandoc pdf/instructions.md -s ---template pdf/eisvogel.tex --highlight-style pdf/pygments.theme -o ${PDF_DEST_DIR}/${COURSE_NUM}/instructions.pdf
+run pandoc pdf/instructions.md -s --template pdf/eisvogel.tex --highlight-style pdf/pygments.theme -o ${PDF_DEST_DIR}/${COURSE_NUM}/instructions.pdf
 
 run sh ../install_lab_env/backup_lab_env.sh
