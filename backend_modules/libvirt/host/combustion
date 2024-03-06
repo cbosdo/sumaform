@@ -23,6 +23,16 @@ zypper ar http://${ use_mirror_images ? mirror : "download.opensuse.org" }/repos
 zypper ar http://${ use_mirror_images ? mirror : "download.opensuse.org" }/repositories/systemsmanagement:/Uyuni:/Test-Packages:/Pool/rpm/ test_packages_pool
 %{ endif }
 
+echo "additional repos"
+for i in ${additional_repos};do
+  name=$(echo $i | cut -d= -f1)
+  url=$(echo $i | cut -d= -f2)
+  echo "Adding $name with url $url"
+  zypper ar $url $name
+  echo "---"
+done
+
+
 # Install packages
 PACKAGES="qemu-guest-agent avahi ca-certificates"
 %{ if container_server }
